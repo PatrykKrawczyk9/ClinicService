@@ -1,29 +1,27 @@
 package pl.kurs.clinicservice.config;
 
-import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.dbcp2.BasicDataSource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
-import org.springframework.orm.jpa.JpaTransactionManager;
+import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.Database;
-import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
-import org.springframework.transaction.PlatformTransactionManager;
 
-@Configuration
+import javax.sql.DataSource;
+
 @ComponentScan(basePackages = "pl.kurs")
 @PropertySource("classpath:application-dev.properties")
+@Configuration
 public class BeansConfig {
 
     @Bean
-    public LocalContainerEntityManagerFactoryBean createEmf() {
+    public LocalContainerEntityManagerFactoryBean createEmf(JpaVendorAdapter adapter, DataSource dataSource) {
         LocalContainerEntityManagerFactoryBean emf = new LocalContainerEntityManagerFactoryBean();
-        emf.setDataSource(getDataSource());
-        emf.setJpaVendorAdapter(getJpaVendorAdapter());
+        emf.setDataSource(dataSource);
+        emf.setJpaVendorAdapter(adapter);
         emf.setPackagesToScan("pl.kurs.clinicservice.models");
         return emf;
     }
@@ -46,14 +44,5 @@ public class BeansConfig {
         bds.setMinIdle(5);
         bds.setMaxIdle(100);
         return bds;
-    }
-
-    @Bean
-    public PlatformTransactionManager transactionManager(@Autowired EntityManagerFactory emf) {
-        JpaTransactionManager transactionManager = new JpaTransactionManager();
-        transactionManager.setEntityManagerFactory(emf);
-        transactionManager.setDataSource(getDataSource());
-        transactionManager.setJpaDialect(new HibernateJpaDialect());
-        return transactionManager;
     }
 }

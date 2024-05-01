@@ -3,10 +3,11 @@ package pl.kurs.clinicservice;
 import jakarta.annotation.Resource;
 import jakarta.persistence.EntityNotFoundException;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.support.AnnotationConfigContextLoader;
 import pl.kurs.clinicservice.config.BeansConfig;
@@ -18,7 +19,6 @@ import pl.kurs.clinicservice.models.Patient;
 import pl.kurs.clinicservice.models.Visit;
 
 import java.time.LocalDate;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -26,6 +26,8 @@ import static org.junit.Assert.*;
 @ContextConfiguration(
         classes = {BeansConfig.class},
         loader = AnnotationConfigContextLoader.class)
+@Sql(scripts = "classpath:test-skrypt.sql")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class ClinicServiceTest {
 
     @Resource
@@ -34,26 +36,6 @@ public class ClinicServiceTest {
     IDoctorDao doctorDao;
     @Resource
     VisitDao visitDao;
-
-    @Before
-    public void init() {
-        Patient patient1 = new Patient("Jan", "Kowalski",
-                LocalDate.of(1990, 1, 1), "12345678901", 1L);
-        Patient patient2 = new Patient("Anna", "Nowak",
-                LocalDate.of(1985, 5, 10), "23456789012", 2L);
-        Doctor doctor1 = new Doctor("Michalski", "Michał",
-                LocalDate.of(1966, 2, 2), "1234", 1L, "chirurg", "4321");
-        Doctor doctor2 = new Doctor("Trąbka", "Bartłomiej",
-                LocalDate.of(1945, 6, 12), "5678", 2L, "chirurg", "8765");
-        Visit visit1 = new Visit(doctor1, patient1, LocalDate.of(2024, 4, 4));
-        Visit visit2 = new Visit(doctor2, patient2, LocalDate.of(2025, 5, 5));
-        patientDao.save(patient1);
-        patientDao.save(patient2);
-        doctorDao.save(doctor1);
-        doctorDao.save(doctor2);
-        visitDao.save(visit1);
-        visitDao.save(visit2);
-    }
 
     @Test
     public void shouldCorrectSavePatient() {
@@ -136,10 +118,10 @@ public class ClinicServiceTest {
         Patient foundedPatient = patientDao.findById(1L);
 
         //then
-        sa.assertThat(foundedPatient.getLastName()).isEqualTo("Jan");
-        sa.assertThat(foundedPatient.getFirstName()).isEqualTo("Kowalski");
-        sa.assertThat(foundedPatient.getBirthDate()).isEqualTo("1990-01-01");
-        sa.assertThat(foundedPatient.getPesel()).isEqualTo("12345678901");
+        sa.assertThat(foundedPatient.getFirstName()).isEqualTo("Jan");
+        sa.assertThat(foundedPatient.getLastName()).isEqualTo("Kowalski");
+        sa.assertThat(foundedPatient.getBirthDate()).isEqualTo("1995-12-10");
+        sa.assertThat(foundedPatient.getPesel()).isEqualTo("123456789");
         sa.assertThat(foundedPatient.getPatientId()).isEqualTo(1L);
         sa.assertAll();
     }
@@ -153,12 +135,12 @@ public class ClinicServiceTest {
         Doctor foundedDoctor = doctorDao.findById(1L);
 
         //then
-        sa.assertThat(foundedDoctor.getLastName()).isEqualTo("Michalski");
-        sa.assertThat(foundedDoctor.getFirstName()).isEqualTo("Michał");
-        sa.assertThat(foundedDoctor.getBirthDate()).isEqualTo("1966-02-02");
-        sa.assertThat(foundedDoctor.getNip()).isEqualTo("4321");
-        sa.assertThat(foundedDoctor.getPesel()).isEqualTo("1234");
-        sa.assertThat(foundedDoctor.getSpecialty()).isEqualTo("chirurg");
+        sa.assertThat(foundedDoctor.getFirstName()).isEqualTo("Joanna");
+        sa.assertThat(foundedDoctor.getLastName()).isEqualTo("Michalska");
+        sa.assertThat(foundedDoctor.getBirthDate()).isEqualTo("1956-02-02");
+        sa.assertThat(foundedDoctor.getNip()).isEqualTo("12345257792");
+        sa.assertThat(foundedDoctor.getPesel()).isEqualTo("987123478");
+        sa.assertThat(foundedDoctor.getSpecialty()).isEqualTo("neurochirug");
         sa.assertThat(foundedDoctor.getDoctorId()).isEqualTo(1L);
         sa.assertAll();
     }
@@ -175,21 +157,21 @@ public class ClinicServiceTest {
         Doctor doctor = foundedVisit.getDoctor();
         Patient patient = foundedVisit.getPatient();
 
-        sa.assertThat(doctor.getLastName()).isEqualTo("Michalski");
-        sa.assertThat(doctor.getFirstName()).isEqualTo("Michał");
-        sa.assertThat(doctor.getBirthDate()).isEqualTo("1966-02-02");
-        sa.assertThat(doctor.getNip()).isEqualTo("4321");
-        sa.assertThat(doctor.getPesel()).isEqualTo("1234");
-        sa.assertThat(doctor.getSpecialty()).isEqualTo("chirurg");
+        sa.assertThat(doctor.getFirstName()).isEqualTo("Joanna");
+        sa.assertThat(doctor.getLastName()).isEqualTo("Michalska");
+        sa.assertThat(doctor.getBirthDate()).isEqualTo("1956-02-02");
+        sa.assertThat(doctor.getNip()).isEqualTo("12345257792");
+        sa.assertThat(doctor.getPesel()).isEqualTo("987123478");
+        sa.assertThat(doctor.getSpecialty()).isEqualTo("neurochirug");
         sa.assertThat(doctor.getDoctorId()).isEqualTo(1L);
 
-        sa.assertThat(patient.getLastName()).isEqualTo("Jan");
-        sa.assertThat(patient.getFirstName()).isEqualTo("Kowalski");
-        sa.assertThat(patient.getBirthDate()).isEqualTo("1990-01-01");
-        sa.assertThat(patient.getPesel()).isEqualTo("12345678901");
+        sa.assertThat(patient.getFirstName()).isEqualTo("Jan");
+        sa.assertThat(patient.getLastName()).isEqualTo("Kowalski");
+        sa.assertThat(patient.getBirthDate()).isEqualTo("1995-12-10");
+        sa.assertThat(patient.getPesel()).isEqualTo("123456789");
         sa.assertThat(patient.getPatientId()).isEqualTo(1L);
 
-        sa.assertThat(foundedVisit.getVisitDate()).isEqualTo(LocalDate.of(2024, 4, 4));
+        sa.assertThat(foundedVisit.getVisitDate()).isEqualTo(LocalDate.of(2024, 5, 2));
 
         sa.assertAll();
     }
@@ -200,18 +182,17 @@ public class ClinicServiceTest {
         SoftAssertions sa = new SoftAssertions();
 
         //when
-        Patient byIdWithVisits = patientDao.findByIdWithVisits(1L);
-        Set<Visit> visits = byIdWithVisits.getVisits();
+        Patient patient = patientDao.findByIdWithVisits(1L);
 
         //then
-        sa.assertThat(byIdWithVisits.getLastName()).isEqualTo("Jan");
-        sa.assertThat(byIdWithVisits.getFirstName()).isEqualTo("Kowalski");
-        sa.assertThat(byIdWithVisits.getBirthDate()).isEqualTo("1990-01-01");
-        sa.assertThat(byIdWithVisits.getPesel()).isEqualTo("12345678901");
-        sa.assertThat(byIdWithVisits.getPatientId()).isEqualTo(1L);
+        sa.assertThat(patient.getFirstName()).isEqualTo("Jan");
+        sa.assertThat(patient.getLastName()).isEqualTo("Kowalski");
+        sa.assertThat(patient.getBirthDate()).isEqualTo("1995-12-10");
+        sa.assertThat(patient.getPesel()).isEqualTo("123456789");
+        sa.assertThat(patient.getPatientId()).isEqualTo(1L);
 
-        sa.assertThat(byIdWithVisits.getVisits().size()).isEqualTo(1);
-        sa.assertThat(byIdWithVisits.getVisits().contains(visitDao.findById(1L))).isTrue();
+        sa.assertThat(patient.getVisits().size()).isEqualTo(1);
+        sa.assertThat(patient.getVisits().contains(visitDao.findById(1L))).isTrue();
         sa.assertAll();
     }
 
@@ -230,8 +211,8 @@ public class ClinicServiceTest {
     public void shouldReturnFirstAvailableVisitAfterDate() {
         // given
         Long doctorId = 1L;
-        LocalDate startDate = LocalDate.of(2024, 4, 3);
-        LocalDate firstAvailableDate = LocalDate.of(2024, 4, 5);
+        LocalDate startDate = LocalDate.of(2024, 5, 1);
+        LocalDate firstAvailableDate = LocalDate.of(2024, 5, 3);
 
         // when
         LocalDate availableVisitDate = doctorDao.findFirstAvailableVisitAfterDate(doctorId, startDate);
