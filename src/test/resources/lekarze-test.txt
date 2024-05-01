@@ -1,0 +1,2 @@
+Id_lekarza	Nazwisko	Imie	Specjalnosc	Data_urodzenia	NIP	PESEL
+1	Patryk	Michalski	neurochirurg	1985-09-22	443-648-27-61	85092263492

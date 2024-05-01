@@ -1,0 +1,2 @@
+Id_pacjenta	Nazwisko	Imie	PESEL	Data_urodzenia
+1	Kowalski	Jan	93052383755	1956-3-22
